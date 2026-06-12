@@ -22,8 +22,9 @@ export default function Login() {
 
   return (
     <div className="auth-container">
-      <h1>🏆 Penca del Mundial 2026</h1>
-      <p style={{ textAlign: 'center', color: '#666', marginBottom: 20 }}>Iniciá sesión para participar</p>
+      <span className="auth-badge">🏆</span>
+      <h1>Penca Mundial 2026</h1>
+      <p className="tagline">Pronosticá, sumá puntos y levantá la copa</p>
       {err && <div className="error">{err}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
@@ -40,9 +41,6 @@ export default function Login() {
       </form>
       <div className="auth-switch">
         ¿Sin cuenta? <Link to="/register">Registrate</Link>
-      </div>
-      <div style={{ marginTop: 16, fontSize: 12, color: '#888', textAlign: 'center' }}>
-        Demo: <code>admin / admin123</code> · <code>maria / maria123</code>
       </div>
     </div>
   )

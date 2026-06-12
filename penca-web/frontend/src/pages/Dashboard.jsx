@@ -45,7 +45,8 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1>🏠 Dashboard</h1>
+      <h1>🏟️ Dashboard del torneo</h1>
+      <p className="page-sub">Resultados y fixture actualizados automáticamente desde el feed oficial del Mundial 2026.</p>
 
       <div className="kpi-grid">
         <div className="kpi azul">

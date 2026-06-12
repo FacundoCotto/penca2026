@@ -25,8 +25,9 @@ export default function Register() {
 
   return (
     <div className="auth-container">
-      <h1>🏆 Registrate</h1>
-      <p style={{ textAlign: 'center', color: '#666', marginBottom: 20 }}>Sumate a la Penca del Mundial 2026</p>
+      <span className="auth-badge">⚽</span>
+      <h1>Creá tu cuenta</h1>
+      <p className="tagline">Sumate a la Penca del Mundial 2026</p>
       {err && <div className="error">{err}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">

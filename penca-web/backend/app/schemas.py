@@ -41,16 +41,6 @@ class MatchBase(BaseModel):
     away_team: str
 
 
-class MatchCreate(MatchBase):
-    home_goals: int | None = None
-    away_goals: int | None = None
-
-
-class MatchResult(BaseModel):
-    home_goals: int = Field(ge=0, le=30)
-    away_goals: int = Field(ge=0, le=30)
-
-
 class MatchOut(MatchBase):
     model_config = ConfigDict(from_attributes=True)
     id: int
@@ -91,3 +81,17 @@ class RankingRow(BaseModel):
     total_points: int
     predictions_count: int
     exact_hits: int
+
+
+# ---------- Admin ----------
+class AdminUserRow(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    username: str
+    email: EmailStr
+    is_admin: bool
+    created_at: datetime
+    predictions_count: int
+    total_points: int
+    exact_hits: int
+    last_prediction_at: datetime | None

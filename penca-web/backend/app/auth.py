@@ -9,9 +9,25 @@ from sqlalchemy.orm import Session
 from . import models
 from .database import get_db
 
+import logging
+
+_logger = logging.getLogger("penca.auth")
+
+_INSECURE_SECRETS = {"", "dev-secret", "change-me-please-in-production"}
+
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret")
 JWT_ALG = os.getenv("JWT_ALG", "HS256")
 JWT_EXPIRE_MIN = int(os.getenv("JWT_EXPIRE_MIN", "1440"))
+
+# En produccion (PENCA_ENV=production) un secreto debil es un error fatal:
+# permitiria forjar tokens de cualquier usuario, incluido el admin.
+if JWT_SECRET in _INSECURE_SECRETS:
+    if os.getenv("PENCA_ENV", "development") == "production":
+        raise RuntimeError(
+            "JWT_SECRET inseguro o ausente. Definí un secreto fuerte "
+            "(ej: `openssl rand -hex 32`) antes de desplegar en producción."
+        )
+    _logger.warning("JWT_SECRET de desarrollo en uso. NO usar en producción.")
 
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)

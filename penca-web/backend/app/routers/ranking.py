@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select
 
 from .. import models, schemas, auth
@@ -14,7 +14,13 @@ def get_ranking(
     db: Session = Depends(get_db),
     _user: models.User = Depends(auth.get_current_user),
 ):
-    users = db.execute(select(models.User).order_by(models.User.id)).scalars().all()
+    # selectinload evita el problema N+1: 3 queries fijas en lugar de
+    # 1 + 2 por usuario (lazy load de predictions y de match).
+    users = db.execute(
+        select(models.User)
+        .options(selectinload(models.User.predictions).selectinload(models.Prediction.match))
+        .order_by(models.User.id)
+    ).scalars().all()
     rows = []
     for u in users:
         preds = u.predictions

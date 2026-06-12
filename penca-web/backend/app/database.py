@@ -7,7 +7,13 @@ DATABASE_URL = os.getenv(
     "postgresql+psycopg://penca:penca@localhost:5432/penca",
 )
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True, echo=False)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20,
+    echo=False,
+)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 

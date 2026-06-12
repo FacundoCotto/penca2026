@@ -94,10 +94,23 @@ def _parse_date(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).replace(tzinfo=None)
 
 
+REQUIRED_FIELDS = ("MatchNumber", "RoundNumber", "DateUtc", "HomeTeam", "AwayTeam")
+
+
 def fetch_fixtures() -> list[dict]:
     resp = requests.get(FEED_URL, headers={"User-Agent": "penca-web/1.0"}, timeout=30)
     resp.raise_for_status()
-    return resp.json()
+    data = resp.json()
+    if not isinstance(data, list):
+        raise ValueError(f"Respuesta inesperada del feed: se esperaba una lista, llegó {type(data).__name__}")
+    return data
+
+
+def _is_valid(item: dict) -> bool:
+    """Valida un item del feed antes de tocar la BD (el feed es externo y no confiable)."""
+    if not isinstance(item, dict):
+        return False
+    return all(item.get(f) is not None for f in REQUIRED_FIELDS)
 
 
 def sync_matches() -> None:
@@ -115,8 +128,12 @@ def sync_matches() -> None:
             for m in db.execute(select(models.Match)).scalars()
             if m.external_id is not None
         }
-        created = updated = 0
+        created = updated = skipped = 0
         for item in fixtures:
+            if not _is_valid(item):
+                skipped += 1
+                logger.warning("Item inválido en el feed, se omite: %r", item)
+                continue
             group = item.get("Group")
             data = dict(
                 match_date=_parse_date(item["DateUtc"]),
@@ -124,8 +141,8 @@ def sync_matches() -> None:
                 group_name=group.replace("Group ", "") if group else None,
                 home_team=_team(item["HomeTeam"]),
                 away_team=_team(item["AwayTeam"]),
-                home_goals=item["HomeTeamScore"],
-                away_goals=item["AwayTeamScore"],
+                home_goals=item.get("HomeTeamScore"),
+                away_goals=item.get("AwayTeamScore"),
             )
             match = existing.get(item["MatchNumber"])
             if match is None:
@@ -140,7 +157,10 @@ def sync_matches() -> None:
                 if changed:
                     updated += 1
         db.commit()
-        logger.info("Mundial 2026: %d partidos creados, %d actualizados", created, updated)
+        logger.info(
+            "Mundial 2026: %d partidos creados, %d actualizados, %d omitidos",
+            created, updated, skipped,
+        )
     except Exception:
         db.rollback()
         logger.exception("Error sincronizando partidos del Mundial 2026")

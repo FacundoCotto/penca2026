@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
-from .. import models, schemas, auth
+from .. import models, auth
+from .. import schemas
 from ..database import get_db
+from ..fixtures import sync_matches
 
 router = APIRouter(prefix="/matches", tags=["matches"])
 
@@ -14,44 +16,13 @@ def list_matches(db: Session = Depends(get_db)):
     return rows
 
 
-@router.post("", response_model=schemas.MatchOut, status_code=201)
-def create_match(
-    data: schemas.MatchCreate,
-    db: Session = Depends(get_db),
-    _admin: models.User = Depends(auth.require_admin),
-):
-    m = models.Match(**data.model_dump())
-    db.add(m)
-    db.commit()
-    db.refresh(m)
-    return m
+@router.post("/sync", status_code=202)
+def force_sync(_admin: models.User = Depends(auth.require_admin)):
+    """Fuerza una sincronizacion inmediata con el feed oficial del Mundial 2026.
 
-
-@router.put("/{match_id}/result", response_model=schemas.MatchOut)
-def set_result(
-    match_id: int,
-    data: schemas.MatchResult,
-    db: Session = Depends(get_db),
-    _admin: models.User = Depends(auth.require_admin),
-):
-    m = db.get(models.Match, match_id)
-    if not m:
-        raise HTTPException(404, "Partido no encontrado")
-    m.home_goals = data.home_goals
-    m.away_goals = data.away_goals
-    db.commit()
-    db.refresh(m)
-    return m
-
-
-@router.delete("/{match_id}", status_code=204)
-def delete_match(
-    match_id: int,
-    db: Session = Depends(get_db),
-    _admin: models.User = Depends(auth.require_admin),
-):
-    m = db.get(models.Match, match_id)
-    if not m:
-        raise HTTPException(404, "Partido no encontrado")
-    db.delete(m)
-    db.commit()
+    Los partidos y resultados se actualizan automaticamente cada
+    MATCH_SYNC_INTERVAL segundos; este endpoint existe solo para que el
+    admin pueda adelantar esa actualizacion sin esperar al proximo ciclo.
+    """
+    sync_matches()
+    return {"detail": "Sincronización ejecutada"}

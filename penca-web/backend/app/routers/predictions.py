@@ -1,5 +1,7 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select
 
 from .. import models, schemas, auth
@@ -18,8 +20,11 @@ def upsert_prediction(
     match = db.get(models.Match, data.match_id)
     if not match:
         raise HTTPException(404, "Partido no encontrado")
-    if match.is_finished:
-        raise HTTPException(400, "El partido ya finalizó: no se pueden cargar pronósticos")
+    # Los pronosticos se cierran al inicio del partido (no al final):
+    # de lo contrario se podria pronosticar con el partido ya empezado.
+    now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+    if match.is_finished or match.match_date <= now_utc:
+        raise HTTPException(400, "El partido ya comenzó: no se pueden cargar pronósticos")
 
     existing = db.execute(
         select(models.Prediction).where(
@@ -54,6 +59,7 @@ def my_predictions(
 ):
     rows = db.execute(
         select(models.Prediction)
+        .options(selectinload(models.Prediction.match))
         .where(models.Prediction.user_id == user.id)
         .order_by(models.Prediction.match_id)
     ).scalars().all()
@@ -83,6 +89,7 @@ def history(
         raise HTTPException(404, "Usuario no encontrado")
     rows = db.execute(
         select(models.Prediction)
+        .options(selectinload(models.Prediction.match))
         .where(models.Prediction.user_id == user_id)
         .order_by(models.Prediction.match_id)
     ).scalars().all()

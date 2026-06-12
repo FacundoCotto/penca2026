@@ -32,7 +32,7 @@ export default function History() {
   return (
     <div>
       <h1>📊 Historial {isMine ? '(mío)' : `de usuario #${targetId}`}</h1>
-      {!isMine && <Link to="/ranking" style={{ color: 'var(--azul)' }}>← Volver al ranking</Link>}
+      {!isMine && <Link to="/ranking" style={{ color: 'var(--cyan)', textDecoration: 'none', fontWeight: 600 }}>← Volver al ranking</Link>}
 
       <div className="kpi-grid" style={{ marginTop: 16 }}>
         <div className="kpi verde">
@@ -84,19 +84,19 @@ export default function History() {
                   <td><b>{it.home_goals} - {it.away_goals}</b></td>
                   <td>
                     {m.is_finished
-                      ? <b style={{ color: 'var(--azul)' }}>{m.home_goals} - {m.away_goals}</b>
+                      ? <b style={{ color: 'var(--cyan)' }}>{m.home_goals} - {m.away_goals}</b>
                       : <span className="badge pending">Pendiente</span>}
                   </td>
                   <td>
                     {m.is_finished
-                      ? <b style={{ color: it.points >= 3 ? 'var(--verde-osc)' : it.points === 1 ? '#666' : 'var(--rojo)' }}>{it.points} pts</b>
+                      ? <b style={{ color: it.points >= 3 ? 'var(--green)' : it.points === 1 ? 'var(--text-dim)' : 'var(--red)' }}>{it.points} pts</b>
                       : '—'}
                   </td>
                 </tr>
               )
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={6} style={{ textAlign: 'center', color: '#888' }}>Sin pronósticos para mostrar.</td></tr>
+              <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-faint)' }}>Sin pronósticos para mostrar.</td></tr>
             )}
           </tbody>
         </table>

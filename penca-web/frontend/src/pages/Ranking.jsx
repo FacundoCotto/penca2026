@@ -17,7 +17,7 @@ export default function Ranking() {
   return (
     <div>
       <h1>🏆 Ranking de la Penca</h1>
-      <p style={{ color: '#666' }}>Ordenado por puntos totales. En caso de empate, gana quien más aciertos exactos tenga.</p>
+      <p className="page-sub">Ordenado por puntos totales. En caso de empate, gana quien más aciertos exactos tenga.</p>
 
       <div className="card">
         <table>
@@ -41,12 +41,8 @@ export default function Ranking() {
                 <td>{r.exact_hits}</td>
                 <td><b>{r.total_points}</b></td>
                 <td>
-                  <div style={{ background: '#eee', borderRadius: 6, height: 14, overflow: 'hidden' }}>
-                    <div style={{
-                      background: 'linear-gradient(90deg, var(--verde), var(--amarillo))',
-                      width: `${(r.total_points / maxPts) * 100}%`,
-                      height: '100%',
-                    }} />
+                  <div className="progress-track">
+                    <div className="progress-fill" style={{ width: `${(r.total_points / maxPts) * 100}%` }} />
                   </div>
                 </td>
                 <td>
@@ -55,7 +51,7 @@ export default function Ranking() {
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={7} style={{ textAlign: 'center', color: '#888' }}>Sin participantes todavía.</td></tr>
+              <tr><td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-faint)' }}>Sin participantes todavía.</td></tr>
             )}
           </tbody>
         </table>

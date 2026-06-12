@@ -24,9 +24,14 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql+psycopg://penca:penca@db:5432/penca
-      JWT_SECRET: change-me-please-in-production
+      # En produccion: PENCA_ENV=production exige un JWT_SECRET fuerte
+      # (generar con `openssl rand -hex 32`) y CORS_ORIGINS con el dominio real.
+      PENCA_ENV: ${PENCA_ENV:-development}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret}
       JWT_ALG: HS256
       JWT_EXPIRE_MIN: "1440"
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
     ports:
       - "8000:8000"
     volumes:
