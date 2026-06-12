@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:fixturedownload.com)",
+      "Bash(curl -s -A \"Mozilla/5.0\" \"https://fixturedownload.com/feed/json/fifa-world-cup-2026\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(len\\(d\\)\\); [print\\(m['MatchNumber'], m['RoundNumber'], m['Group'], m['HomeTeam'], '-', m['AwayTeam']\\) for m in d if m['RoundNumber']>3][:0]; rounds={}; [rounds.setdefault\\(m['RoundNumber'],[]\\).append\\(m['MatchNumber']\\) for m in d]; print\\({k:\\(len\\(v\\),min\\(v\\),max\\(v\\)\\) for k,v in rounds.items\\(\\)}\\); print\\([m for m in d if m['RoundNumber']>=4][:2]\\)\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); teams=sorted\\({t for m in d for t in \\(m['HomeTeam'],m['AwayTeam']\\) if m['Group']}\\); print\\(teams\\)\")",
+      "Bash(sed -i 's/Penca del Mundial 🏆/Penca del Mundial 2026 🏆/' index.html)",
+      "Bash(sed -i 's/🏆 Penca del Mundial</🏆 Penca del Mundial 2026</' src/pages/Login.jsx)",
+      "Bash(sed -i 's/⚽ Penca del Mundial</⚽ Penca del Mundial 2026</' src/App.jsx)",
+      "Bash(sed -i 's/Sumate a la Penca del Mundial</Sumate a la Penca del Mundial 2026</' src/pages/Register.jsx)",
+      "Bash(./venv/Scripts/python -m pip install -q requests==2.32.3)",
+      "Bash(./venv/Scripts/python -c ':*)"
+    ]
+  }
+}
